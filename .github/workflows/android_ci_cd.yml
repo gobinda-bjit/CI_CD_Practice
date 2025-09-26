@@ -53,8 +53,8 @@ jobs:
       # Step 8: Upload APK to Google Drive
       - name: Upload APK to Google Drive
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}  # Use GitHub Secrets for credentials
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-          google-drive-upload \
-          Hello_World/app/build/outputs/apk/release/app-release.apk \
-          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I  # Replace with your Google Drive folder ID
+                npx google-drive-upload \
+                Hello_World/app/build/outputs/apk/release/app-release.apk \
+                1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
