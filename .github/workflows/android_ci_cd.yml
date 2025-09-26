@@ -43,10 +43,18 @@ jobs:
         working-directory: Hello_World
         run: ./gradlew assembleRelease
 
-      # Step 7: Upload APK to Google Drive
-      - name: Upload to Google Drive
+      # Step 7: Install google-drive-upload
+      - name: Install google-drive-upload
+        run: |
+          npm install -g google-drive-upload
+          export PATH="$PATH:$(npm config get prefix)/bin"
+          echo "PATH: $PATH"
+          
+      # Step 8: Upload APK to Google Drive
+      - name: Upload APK
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-          npm install -g google-drive-upload
-          google-drive-upload Hello_World/app/build/outputs/apk/release/app-release.apk 1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I # Replace with your actual Folder ID
+          google-drive-upload \
+          Hello_World/app/build/outputs/apk/release/app-release.apk \
+          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
