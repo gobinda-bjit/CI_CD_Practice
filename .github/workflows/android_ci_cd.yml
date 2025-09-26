@@ -2,8 +2,8 @@ name: Build and Upload APK
 
 on:
   push:
-    branches: 
-    - main # Specify the branch that triggers the workflow
+    branches:
+      - main # Specify the branch to trigger the workflow
 
 jobs:
   build:
@@ -11,31 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    # Step 2: Set up JDK (required to build Android projects)
-    - name: Setup JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21' # Ensure it matches your project's Java version
-        distribution: 'temurin'
-        cache: gradle
+      # Step 2: Set up Java Development Kit (JDK)
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17' # Update according to your project requirements
+          distribution: 'temurin'
+          cache: gradle
 
-#   # Step 3: Make Gradle wrapper executable
-     - name: Grant execute permission for gradlew
-       run: chmod +x gradlew
-       
-    # Step 4: Build APK using Gradle
-    - name: Build APK
-      run: |
-        ./gradlew assembleRelease
+      # Step 3: Grant execute permissions to the Gradle wrapper
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-    # Step 5: Upload APK to Google Drive
-    - name: Upload to Google Drive
-      env:
-        GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-      run: |
-        npm install -g google-drive-upload
-        google-drive-upload ./app/build/outputs/apk/release/app-release.apk 1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I # Replace FolderID with your target folder ID
+      # Step 4: Build APK using Gradle
+      - name: Build APK
+        run: ./gradlew assembleRelease
+
+      # Step 5: Upload APK to Google Drive
+      - name: Upload to Google Drive
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          npm install -g google-drive-upload
+          google-drive-upload ./app/build/outputs/apk/release/app-release.apk <Your-Google-Drive-FolderID> # Replace with your actual Folder ID
