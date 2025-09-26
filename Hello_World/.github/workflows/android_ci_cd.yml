@@ -2,7 +2,8 @@ name: Build and Upload APK
 
 on:
   push:
-    branches: ["main"] # Specify the branch that triggers the workflow
+    branches: 
+    - main # Specify the branch that triggers the workflow
 
 jobs:
   build:
