@@ -37,6 +37,6 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
 
-      - name: Upload APK to Google Drive
+      - name: Upload APK to Google Drive Run
         run: |
           rclone copy Hello_World/app/build/outputs/apk/release/app-release.apk gdrive:MyApkBackups/
