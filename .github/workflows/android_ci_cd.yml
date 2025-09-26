@@ -11,56 +11,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Java Development Kit (JDK)
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'  # Specify required JDK version
+          java-version: '17'
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Navigate to the project directory
       - name: Change to project directory
         working-directory: Hello_World
-        run: pwd  # Debugging: Check current working directory
-      
-      # Step 4: Display project directory contents
+        run: pwd
+
       - name: Verify project files
         working-directory: Hello_World
-        run: ls -la  # Sanity check for project files (like gradlew)
+        run: ls -la
 
-      # Step 5: Grant execute permissions for Gradle wrapper
       - name: Make gradlew executable
         working-directory: Hello_World
         run: chmod +x gradlew
 
-      # Step 6: Build the APK
       - name: Build APK
         working-directory: Hello_World
         run: ./gradlew assembleRelease
 
-      # Step 7: Install google-drive-upload globally
+      # Install google-drive-upload globally and add to PATH
       - name: Install google-drive-upload CLI
         run: |
           npm install -g google-drive-upload
-          echo "Adding npm global path to PATH"
           echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
-          echo "::debug::CLI installed, validating installation..."
-          google-drive-upload --version || echo "Installation validation failed."
 
-      # Step 8: Debug PATH Variable
+      # Debug PATH after adding npm global bin
       - name: Debug PATH variable
-        run: echo PATH=$PATH
+        run: echo $PATH
 
-      # Step 9: Upload APK to Google Drive
+      # Upload APK in a separate step so PATH includes npm global bin
       - name: Upload APK to Google Drive
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-          google-drive-upload \
-          Hello_World/app/build/outputs/apk/release/app-release.apk \
-          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
+          google-drive-upload Hello_World/app/build/outputs/apk/release/app-release.apk 1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
