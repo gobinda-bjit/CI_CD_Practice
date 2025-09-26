@@ -3,31 +3,22 @@ name: Build and Upload APK
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the 'main' branch
+      - main
 
 jobs:
   build:
-    name: Build and Upload APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup JDK
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
-
-      - name: Change to project directory
-        working-directory: Hello_World
-        run: pwd
-
-      - name: Verify project files
-        working-directory: Hello_World
-        run: ls -la
 
       - name: Make gradlew executable
         working-directory: Hello_World
@@ -37,19 +28,15 @@ jobs:
         working-directory: Hello_World
         run: ./gradlew assembleRelease
 
-      # Install google-drive-upload globally and add to PATH
-      - name: Install google-drive-upload CLI
+      - name: Install rclone
         run: |
-          npm install -g google-drive-upload
-          echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
+          curl https://rclone.org/install.sh | sudo bash
 
-      # Debug PATH after adding npm global bin
-      - name: Debug PATH variable
-        run: echo $PATH
+      - name: Setup rclone config
+        run: |
+          mkdir -p ~/.config/rclone
+          echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
 
-      # Upload APK in a separate step so PATH includes npm global bin
       - name: Upload APK to Google Drive
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-          google-drive-upload Hello_World/app/build/outputs/apk/release/app-release.apk 1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
+          rclone copy Hello_World/app/build/outputs/apk/release/app-release.apk gdrive:MyApkBackups/
