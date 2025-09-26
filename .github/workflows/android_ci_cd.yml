@@ -49,4 +49,4 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
           npm install -g google-drive-upload
-          google-drive-upload ./app/build/outputs/apk/release/app-release.apk 1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I # Replace with your actual Folder ID
+          google-drive-upload Hello_World/app/build/outputs/apk/release/app-release.apk 1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I # Replace with your actual Folder ID
