@@ -3,7 +3,7 @@ name: Build and Upload APK
 on:
   push:
     branches:
-      - main # Specify the branch to trigger the workflow
+      - main  # Trigger workflow on pushes to the 'main' branch
 
 jobs:
   build:
@@ -19,42 +19,42 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17' # Update according to your project requirements
+          java-version: '17'  # Match your project's requirements
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Navigate to Hello_World directory
+      # Step 3: Navigate to project directory
       - name: Change to project directory
-        working-directory: Hello_World # Set working directory to Hello_World
-        run: pwd  # Print working directory for debugging
+        working-directory: Hello_World
+        run: pwd  # Debug: Print working directory
 
-      # Step 4: List directory contents
+      # Step 4: Verify directory contents
       - name: List directory contents
         working-directory: Hello_World
-        run: ls -la  # Ensure all necessary files are accessible
+        run: ls -la  # Debugging the presence of required files (e.g., gradlew script)
 
-      # Step 5: Grant execute permissions to gradlew
-      - name: Grant execute permissions for gradlew
+      # Step 5: Grant execute permissions
+      - name: Grant permissions to gradlew
         working-directory: Hello_World
         run: chmod +x gradlew
 
-      # Step 6: Build APK using the Gradle wrapper
+      # Step 6: Build the APK
       - name: Build APK
         working-directory: Hello_World
         run: ./gradlew assembleRelease
 
-      # Step 7: Install google-drive-upload
+      # Step 7: Install google-drive-upload and fix PATH
       - name: Install google-drive-upload
         run: |
           npm install -g google-drive-upload
-          export PATH="$PATH:$(npm config get prefix)/bin"
-          echo "PATH: $PATH"
-          
+          echo "Adding npm global bin to PATH"
+          echo "::add-path::$(npm config get prefix)/bin" # Add npm binary path to $PATH for this runner
+
       # Step 8: Upload APK to Google Drive
-      - name: Upload APK
+      - name: Upload APK to Google Drive
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}  # Use GitHub secret for Google Drive authentication
         run: |
           google-drive-upload \
           Hello_World/app/build/outputs/apk/release/app-release.apk \
-          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
+          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I  # Replace with your Drive Folder ID
