@@ -3,7 +3,7 @@ name: Build and Upload APK
 on:
   push:
     branches:
-      - main  # Trigger workflow on pushes to the 'main' branch
+      - main  # Trigger on pushes to the 'main' branch
 
 jobs:
   build:
@@ -19,22 +19,22 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'  # Specify your JDK version
+          java-version: '17'  # Specify required JDK version
           distribution: 'temurin'
           cache: gradle
 
       # Step 3: Navigate to the project directory
       - name: Change to project directory
         working-directory: Hello_World
-        run: pwd  # Debug: Show the working directory
-
-      # Step 4: Verify directory contents
-      - name: List project directory contents
+        run: pwd  # Debugging: Check current working directory
+      
+      # Step 4: Display project directory contents
+      - name: Verify project files
         working-directory: Hello_World
-        run: ls -la  # Debug: Check for project files like gradlew
+        run: ls -la  # Sanity check for project files (like gradlew)
 
-      # Step 5: Grant execute permissions to gradlew
-      - name: Grant permissions to gradlew
+      # Step 5: Grant execute permissions for Gradle wrapper
+      - name: Make gradlew executable
         working-directory: Hello_World
         run: chmod +x gradlew
 
@@ -43,18 +43,24 @@ jobs:
         working-directory: Hello_World
         run: ./gradlew assembleRelease
 
-      # Step 7: Install google-drive-upload and update PATH
-      - name: Install google-drive-upload and update PATH
+      # Step 7: Install google-drive-upload globally
+      - name: Install google-drive-upload CLI
         run: |
           npm install -g google-drive-upload
-          # Add npm binary path to PATH securely
+          echo "Adding npm global path to PATH"
           echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
+          echo "::debug::CLI installed, validating installation..."
+          google-drive-upload --version || echo "Installation validation failed."
 
-      # Step 8: Upload APK to Google Drive
+      # Step 8: Debug PATH Variable
+      - name: Debug PATH variable
+        run: echo PATH=$PATH
+
+      # Step 9: Upload APK to Google Drive
       - name: Upload APK to Google Drive
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: |
-                npx google-drive-upload \
-                Hello_World/app/build/outputs/apk/release/app-release.apk \
-                1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
+          google-drive-upload \
+          Hello_World/app/build/outputs/apk/release/app-release.apk \
+          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I
