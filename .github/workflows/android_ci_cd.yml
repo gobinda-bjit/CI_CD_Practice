@@ -19,21 +19,21 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'  # Match your project's requirements
+          java-version: '17'  # Specify your JDK version
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Navigate to project directory
+      # Step 3: Navigate to the project directory
       - name: Change to project directory
         working-directory: Hello_World
-        run: pwd  # Debug: Print working directory
+        run: pwd  # Debug: Show the working directory
 
       # Step 4: Verify directory contents
-      - name: List directory contents
+      - name: List project directory contents
         working-directory: Hello_World
-        run: ls -la  # Debugging the presence of required files (e.g., gradlew script)
+        run: ls -la  # Debug: Check for project files like gradlew
 
-      # Step 5: Grant execute permissions
+      # Step 5: Grant execute permissions to gradlew
       - name: Grant permissions to gradlew
         working-directory: Hello_World
         run: chmod +x gradlew
@@ -43,18 +43,18 @@ jobs:
         working-directory: Hello_World
         run: ./gradlew assembleRelease
 
-      # Step 7: Install google-drive-upload and fix PATH
-      - name: Install google-drive-upload
+      # Step 7: Install google-drive-upload and update PATH
+      - name: Install google-drive-upload and update PATH
         run: |
           npm install -g google-drive-upload
-          echo "Adding npm global bin to PATH"
-          echo "::add-path::$(npm config get prefix)/bin" # Add npm binary path to $PATH for this runner
+          # Add npm binary path to PATH securely
+          echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
 
       # Step 8: Upload APK to Google Drive
       - name: Upload APK to Google Drive
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}  # Use GitHub secret for Google Drive authentication
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}  # Use GitHub Secrets for credentials
         run: |
           google-drive-upload \
           Hello_World/app/build/outputs/apk/release/app-release.apk \
-          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I  # Replace with your Drive Folder ID
+          1erknlEj6gPnwnJJtcVsC0KC0a8vmZT8I  # Replace with your Google Drive folder ID
