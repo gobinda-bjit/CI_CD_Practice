@@ -23,15 +23,27 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Grant execute permissions to the Gradle wrapper
-      - name: Grant execute permission for gradlew
-        run: chmod +x Hello_World/gradlew
+      # Step 3: Navigate to Hello_World directory
+      - name: Change to project directory
+        working-directory: Hello_World # Set working directory to Hello_World
+        run: pwd  # Print working directory for debugging
 
-      # Step 4: Build APK using Gradle
+      # Step 4: List directory contents
+      - name: List directory contents
+        working-directory: Hello_World
+        run: ls -la  # Ensure all necessary files are accessible
+
+      # Step 5: Grant execute permissions to gradlew
+      - name: Grant execute permissions for gradlew
+        working-directory: Hello_World
+        run: chmod +x gradlew
+
+      # Step 6: Build APK using the Gradle wrapper
       - name: Build APK
-        run: ./Hello_World/gradlew assembleRelease
+        working-directory: Hello_World
+        run: ./gradlew assembleRelease
 
-      # Step 5: Upload APK to Google Drive
+      # Step 7: Upload APK to Google Drive
       - name: Upload to Google Drive
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
