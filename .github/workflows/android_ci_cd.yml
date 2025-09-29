@@ -28,15 +28,37 @@ jobs:
         working-directory: Hello_World
         run: ./gradlew assembleRelease
 
-      - name: Install rclone
+      - name: Get Google OAuth2 access token
+        id: get_token
         run: |
-          curl https://rclone.org/install.sh | sudo bash
-
-      - name: Setup rclone config
-        run: |
-          mkdir -p ~/.config/rclone
-          echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
+          RESPONSE=$(curl -s \
+            --request POST \
+            --data "client_id=${{ secrets.GDRIVE_CLIENT_ID }}" \
+            --data "client_secret=${{ secrets.GDRIVE_CLIENT_SECRET }}" \
+            --data "refresh_token=${{ secrets.GDRIVE_REFRESH_TOKEN }}" \
+            --data "grant_type=refresh_token" \
+            https://oauth2.googleapis.com/token)
+          echo "$RESPONSE"
+          ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r .access_token)
+          if [[ -z "$ACCESS_TOKEN" ]]; then
+            echo "Failed to obtain access token."
+            exit 1
+          fi
+          echo "::add-mask::$ACCESS_TOKEN"
+          echo "token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
 
       - name: Upload APK to Google Drive Run
+        env:
+          GDRIVE_TOKEN: ${{ steps.get_token.outputs.token }}
         run: |
-          rclone copy Hello_World/app/build/outputs/apk/release/app-release.apk CI_CD:MyApkBackups/
+          FILE="Hello_World/app/build/outputs/apk/release/app-release.apk"
+          FOLDER_ID="1YoMw4-3arLLbGPwNTruvwxgCzc1XQAQF"
+          echo "GDRIVE_TOKEN: $GDRIVE_TOKEN" 
+          
+          METADATA="{\"name\": \"${FILE}\", \"parents\": [\"${FOLDER_ID}\"]}"
+          
+          curl -X POST \
+            -H "Authorization: Bearer $GDRIVE_TOKEN" \
+            -F "metadata=$METADATA;type=application/json;charset=UTF-8" \
+            -F "file=@$FILE;type=$(file -b --mime-type $FILE)" \
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
